@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Weather App</title>
+</head>
+<body>
+	<h1>Weather App</h1>
+	<label for="place">Place:</label>
+	<input id="place" type="text" placeholder="Enter Place">
+	<button id="fetchBtn">Weather</button>
+	<div id="result" aria-live="polite" style="margin-top:1em"></div>
+	<script>
+		async function getWeather() {
+			const place = document.getElementById('place').value.trim();
+			const resultEl = document.getElementById('result');
+			if (!place) {
+				resultEl.textContent = 'Please enter a place name.';
+				return;
+			}
+			try {
+				const apiKey = '4622439aec9e8f29574ee9f26c0c63c3';
+				const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(place)}&appid=${apiKey}&units=metric`;
+
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error('Place not found or API error');
+				}
+				const data = await response.json();
+
+				const temp = data.main && data.main.temp;
+				const humidity = data.main && data.main.humidity;
+				const condition = data.weather && data.weather[0] && data.weather[0].description;
+
+				resultEl.innerHTML = `
+					<p><strong>Temperature:</strong> ${temp}°C</p>
+					<p><strong>Humidity:</strong> ${humidity}%</p>
+					<p><strong>Condition:</strong> ${condition}</p>
+				`;
+			} catch (err) {
+				resultEl.textContent = 'Error: ' + err.message;
+			}
+		}
+		document.getElementById('fetchBtn').addEventListener('click', getWeather);
+		document.getElementById('place').addEventListener('keyup', function (e) {
+			if (e.key === 'Enter') getWeather();
+		});
+	</script>
+</body>
+</html>
