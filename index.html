@@ -1,51 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Weather App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                        url('https://i.pinimg.com/736x/14/68/f3/1468f346a832dece8b497b2d79c79904.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 2.5rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            width:100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-weight: 300;
+            font-size: 2rem;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            background: white;
+            color: #1a2a2d;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.02);
+        }
+
+        #result {
+            margin-top: 10px;
+        }
+
+        .temp {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .detail {
+            font-size: 1.1rem;
+            margin: 5px 0;
+            text-transform: capitalize;
+            opacity: 0.9;
+        }
+
+        .error {
+            color: #ffcccb;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-	<h1>Weather App</h1>
-	<label for="place">Place:</label>
-	<input id="place" type="text" placeholder="Enter Place">
-	<button id="fetchBtn">Weather</button>
-	<div id="result" aria-live="polite" style="margin-top:1em"></div>
-	<script>
-		async function getWeather() {
-			const place = document.getElementById('place').value.trim();
-			const resultEl = document.getElementById('result');
-			if (!place) {
-				resultEl.textContent = 'Please enter a place name.';
-				return;
-			}
-			try {
-				const apiKey = '4622439aec9e8f29574ee9f26c0c63c3';
-				const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(place)}&appid=${apiKey}&units=metric`;
 
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error('Place not found or API error');
-				}
-				const data = await response.json();
+    <div class="card">
+        <h1>WEATHER</h1>
+        <div class="input-group">
+            <input id="place" type="text" placeholder="Enter city name...">
+            <button id="fetchBtn">Search</button>
+        </div>
+        <div id="result" aria-live="polite">
+            <p style="opacity: 0.6;">Ready to check the skies?</p>
+        </div>
+    </div>
 
-				const temp = data.main && data.main.temp;
-				const humidity = data.main && data.main.humidity;
-				const condition = data.weather && data.weather[0] && data.weather[0].description;
+    <script>
+        async function getWeather() {
+            const place = document.getElementById('place').value.trim();
+            const resultEl = document.getElementById('result');
+            if (!place) {
+                resultEl.innerHTML = '<p class="error">Please enter a place.</p>';
+                return;
+            }
 
-				resultEl.innerHTML = `
-					<p><strong>Temperature:</strong> ${temp}°C</p>
-					<p><strong>Humidity:</strong> ${humidity}%</p>
-					<p><strong>Condition:</strong> ${condition}</p>
-				`;
-			} catch (err) {
-				resultEl.textContent = 'Error: ' + err.message;
-			}
-		}
-		document.getElementById('fetchBtn').addEventListener('click', getWeather);
-		document.getElementById('place').addEventListener('keyup', function (e) {
-			if (e.key === 'Enter') getWeather();
-		});
-	</script>
+            resultEl.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const apiKey = '4622439aec9e8f29574ee9f26c0c63c3';
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(place)}&appid=${apiKey}&units=metric`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('City not found');
+                const data = await response.json();
+                const temp = Math.round(data.main.temp);
+                const humidity = data.main.humidity;
+                const condition = data.weather[0].description;
+
+                resultEl.innerHTML = `
+                    <div class="weather-info">
+                        <p class="temp">${temp}°C</p>
+                        <p class="detail">${condition}</p>
+                        <p class="detail" style="font-size: 0.9rem; margin-top: 15px;">
+                            Humidity: ${humidity}%
+                        </p>
+                    </div>
+                `;
+            } catch (err) {
+                resultEl.innerHTML = `<p class="error">${err.message}</p>`;
+            }
+        }
+
+        document.getElementById('fetchBtn').addEventListener('click', getWeather);
+        document.getElementById('place').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') getWeather();
+        });
+    </script>
 </body>
 </html>
